@@ -26,6 +26,8 @@ export interface PersonalReport {
 }
 
 export interface TeamMemberReport {
+  startedEnrollments?: number
+  lastObjectiveActivityAt?: Date | null
   membershipId: string
   email: string
   role: 'USER' | 'MANAGER' | 'CEO'
@@ -62,6 +64,7 @@ export interface TenantProgramReport {
 }
 
 export interface TenantReport {
+  members?: TeamMemberReport[]
   tenantId: string
   summary: {
     activeMembers: number

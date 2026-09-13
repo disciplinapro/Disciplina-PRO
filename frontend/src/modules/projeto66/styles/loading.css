@@ -1,0 +1,77 @@
+.p66-loading-card {
+  padding: clamp(24px, 5vw, 40px) 20px;
+  border: 1px solid var(--separator);
+  border-radius: 24px;
+  background: radial-gradient(ellipse at top, rgba(255, 107, 0, .14), transparent 75%), var(--bg2);
+  text-align: center;
+}
+
+.p66-loading-card h1 {
+  margin: 18px 0 10px;
+  font-size: clamp(22px, 4vw, 30px);
+  line-height: 1.2;
+}
+
+.p66-loading-card p {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+.p66-loading-detail {
+  color: var(--label2);
+  font-size: 14px;
+}
+
+.p66-loading-spinner {
+  display: block;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  border: 3px solid var(--bg3);
+  border-top-color: var(--fire);
+  border-right-color: var(--gold);
+  border-radius: 50%;
+  animation: p66-loading-spin 1.2s linear infinite;
+}
+
+.p66-loading-preview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.p66-loading-placeholder {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid var(--separator);
+  border-radius: 20px;
+  background: var(--bg2);
+}
+
+.p66-loading-placeholder-hero {
+  grid-column: 1 / -1;
+}
+
+.p66-loading-placeholder span {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--bg3);
+  animation: p66-loading-pulse 1.8s ease-in-out infinite alternate;
+}
+
+.p66-loading-placeholder span:first-child { width: 55%; }
+.p66-loading-placeholder span:last-child { width: 80%; }
+
+@keyframes p66-loading-spin { to { transform: rotate(360deg); } }
+@keyframes p66-loading-pulse { to { opacity: .4; } }
+
+@media (max-width: 480px) {
+  .p66-loading-preview { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p66-loading-spinner, .p66-loading-placeholder span { animation: none; }
+}

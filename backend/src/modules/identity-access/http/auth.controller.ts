@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, HttpCode, Post, Req, Res, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, Post, Req, Res, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Throttle } from '@nestjs/throttler'
@@ -9,7 +9,9 @@ import { LoginUseCase } from '../application/login.use-case.js'
 import { ResolveRefreshSessionUseCase } from '../application/resolve-refresh-session.use-case.js'
 import { RevokeSessionUseCase } from '../application/revoke-session.use-case.js'
 import { RotateSessionUseCase } from '../application/rotate-session.use-case.js'
-import { InvalidCredentialsError } from '../domain/identity.errors.js'
+import { InvalidCredentialsError, WeakPasswordError } from '../domain/identity.errors.js'
+import { InvalidPasswordResetError, PasswordRecoveryUseCase } from '../application/password-recovery.use-case.js'
+import { RequestPasswordRecoveryDto, ResetPasswordDto } from './password-recovery.dto.js'
 import { InvalidRefreshTokenError, RefreshTokenReuseError } from '../domain/session.errors.js'
 import { LoginDto } from './login.dto.js'
 import { Public } from './public.decorator.js'
@@ -28,7 +30,34 @@ export class AuthController {
     private readonly revoke: RevokeSessionUseCase,
     private readonly resolveSession: ResolveRefreshSessionUseCase,
     private readonly csrf: CsrfTokenService,
+    private readonly recovery: PasswordRecoveryUseCase,
   ) {}
+
+  @Post('forgot-password')
+  @Public()
+  @HttpCode(200)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async forgotPassword(@Body() input: RequestPasswordRecoveryDto, @Req() request: Request) {
+    this.assertAllowedOrigin(request)
+    await this.recovery.request(input.email)
+    return { message: 'Se houver uma conta ativa para este e-mail, enviaremos um link para redefinir sua senha.' }
+  }
+
+  @Post('reset-password')
+  @Public()
+  @HttpCode(204)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  async resetPassword(@Body() input: ResetPasswordDto, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    this.assertAllowedOrigin(request)
+    try {
+      await this.recovery.reset(input.token, input.password)
+      this.clearSessionCookies(response)
+    } catch (error) {
+      if (error instanceof InvalidPasswordResetError) throw new BadRequestException({ code: 'INVALID_RESET_TOKEN', message: error.message })
+      if (error instanceof WeakPasswordError) throw new BadRequestException({ code: 'WEAK_PASSWORD', message: error.message })
+      throw error
+    }
+  }
 
   @Post('login')
   @Public()

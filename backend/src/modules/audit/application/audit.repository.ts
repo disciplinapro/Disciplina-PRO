@@ -1,6 +1,10 @@
 import type { CurrentTenantContext } from '../../organizations/application/organization-context.repository.js'
 
 export interface AuditEventView {
+  actor?: { email: string; role: string } | null
+  target?: { email: string; role: string } | null
+  programTitle?: string | null
+  activityTitle?: string | null
   id: string
   actorType: 'MEMBERSHIP' | 'PLATFORM_ACCESS' | 'SYSTEM'
   actorMembershipId: string | null

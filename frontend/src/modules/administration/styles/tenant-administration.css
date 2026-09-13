@@ -14,3 +14,14 @@
 .admin-invitation-form fieldset label{display:inline-flex;align-items:center;gap:6px;min-height:44px;min-width:44px;cursor:pointer}
 .admin-dialog{position:static;max-width:none;margin:0;color:inherit}.admin-dialog form>div{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.admin-dialog form>div button{min-height:44px}
 .admin-delivery,.admin-action-notice{display:block}
+
+.admin-dismissible{position:relative;padding-right:58px;margin-block:12px}
+.admin-dismiss{position:absolute;top:4px;right:4px;display:grid;place-items:center;min-width:44px;min-height:44px;border:0;border-radius:4px;background:transparent;color:inherit;font-size:26px;cursor:pointer}
+.admin-dismiss:hover{background:rgba(255,255,255,.08)}
+.admin-dismiss:focus-visible,.admin-audit summary:focus-visible{outline:2px solid var(--ouro);outline-offset:2px}
+.admin-insights-note,.admin-metrics small{display:block;color:var(--cinza);font-size:12px;line-height:1.6}
+.admin-metrics small{margin-top:8px}
+.admin-audit summary{cursor:pointer;min-height:44px;padding:12px 0;font-weight:600}
+.admin-report-members article>div,.admin-audit article>div{min-width:0;overflow-wrap:anywhere}
+.admin-report-members article>small{flex-shrink:0;max-width:45%;line-height:1.6}
+@media(max-width:700px){.admin-report-members article>small{max-width:100%}}

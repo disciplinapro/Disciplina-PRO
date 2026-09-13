@@ -15,6 +15,9 @@ const publicAuditSelect = {
   entityId: true,
   action: true,
   occurredAt: true,
+  metadata: true,
+  actorMembership: { select: { tenantId: true, role: true, user: { select: { email: true } } } },
+  targetMembership: { select: { tenantId: true, role: true, user: { select: { email: true } } } },
 } satisfies Prisma.AuditEventSelect
 
 @Injectable()
@@ -94,6 +97,8 @@ export class PrismaAuditRepository extends AuditQueryRepository implements Audit
   }
 
   private async page(where: Prisma.AuditEventWhereInput, input: AuditPageInput): Promise<AuditPage> {
+    if (typeof where.tenantId !== 'string') throw new Error('Auditoria exige organização explícita')
+    const tenantId = where.tenantId
     const [items, total] = await Promise.all([
       this.prisma.auditEvent.findMany({
         where,
@@ -104,7 +109,26 @@ export class PrismaAuditRepository extends AuditQueryRepository implements Audit
       }),
       this.prisma.auditEvent.count({ where }),
     ])
-    return { items, page: input.page, limit: input.limit, total }
+    const enrollmentIds = items.filter((item) => item.entityType === 'Enrollment' && item.entityId).map((item) => item.entityId!)
+    const enrollments = enrollmentIds.length ? await this.prisma.enrollment.findMany({
+      where: { id: { in: enrollmentIds }, tenantId },
+      select: { id: true, programVersion: { select: { title: true, activities: { select: { id: true, title: true } } } } },
+    }) : []
+    const programs = new Map(enrollments.map((item) => [item.id, item.programVersion]))
+    const views = items.map(({ metadata, actorMembership, targetMembership, ...item }) => {
+      const program = item.entityType === 'Enrollment' ? programs.get(item.entityId ?? '') : null
+      const activityId = metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata.activityId : null
+      const person = (membership: typeof actorMembership) => membership && membership.tenantId === tenantId
+        ? { email: membership.user.email, role: membership.role } : null
+      return {
+        ...item,
+        actor: person(actorMembership),
+        target: person(targetMembership),
+        programTitle: program?.title ?? null,
+        activityTitle: item.action === 'ACTIVITY_COMPLETED' ? program?.activities.find(({ id }) => id === activityId)?.title ?? null : null,
+      }
+    })
+    return { items: views, page: input.page, limit: input.limit, total }
   }
 
   private async assertActiveActor(context: CurrentTenantContext, role?: 'CEO' | 'MANAGER') {

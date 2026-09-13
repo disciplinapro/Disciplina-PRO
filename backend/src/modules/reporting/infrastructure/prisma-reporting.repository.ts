@@ -10,6 +10,34 @@ import {
   type TeamReport,
 } from '../application/reporting.repository.js'
 
+const memberEnrollmentSelect = {
+  membershipId: true, status: true, startedOn: true,
+  _count: { select: { activityCompletions: true, dailyRecords: true } },
+  activityCompletions: { select: { completedAt: true }, orderBy: { completedAt: 'desc' }, take: 1 },
+  dailyRecords: { select: { submittedAt: true }, orderBy: { submittedAt: 'desc' }, take: 1 },
+} as const
+
+function memberSummary(enrollments: Array<{
+  status: string; startedOn: Date | null;
+  _count: { activityCompletions: number; dailyRecords: number };
+  activityCompletions: Array<{ completedAt: Date }>;
+  dailyRecords: Array<{ submittedAt: Date }>;
+}>) {
+  const dates = enrollments.flatMap((item) => [
+    ...item.activityCompletions.map(({ completedAt }) => completedAt),
+    ...item.dailyRecords.map(({ submittedAt }) => submittedAt),
+  ])
+  return {
+    enrollments: enrollments.length,
+    startedEnrollments: enrollments.filter(({ startedOn }) => startedOn !== null).length,
+    activeEnrollments: enrollments.filter(({ status }) => status === 'ACTIVE' || status === 'PAUSED').length,
+    completedEnrollments: enrollments.filter(({ status }) => status === 'COMPLETED').length,
+    activityCompletions: enrollments.reduce((sum, item) => sum + item._count.activityCompletions, 0),
+    dailyRecords: enrollments.reduce((sum, item) => sum + item._count.dailyRecords, 0),
+    lastObjectiveActivityAt: dates.reduce<Date | null>((latest, date) => !latest || date > latest ? date : latest, null),
+  }
+}
+
 @Injectable()
 export class PrismaReportingRepository extends ReportingRepository {
   constructor(private readonly prisma: PrismaService) { super() }
@@ -92,11 +120,7 @@ export class PrismaReportingRepository extends ReportingRepository {
     const membershipIds = team.memberships.map(({ membership }) => membership.id)
     const enrollments = membershipIds.length === 0 ? [] : await this.prisma.enrollment.findMany({
       where: { tenantId: context.tenantId, membershipId: { in: membershipIds } },
-      select: {
-        membershipId: true,
-        status: true,
-        _count: { select: { activityCompletions: true, dailyRecords: true } },
-      },
+      select: memberEnrollmentSelect,
     })
     const enrollmentsByMembership = new Map<string, typeof enrollments>()
     for (const enrollment of enrollments) {
@@ -110,11 +134,7 @@ export class PrismaReportingRepository extends ReportingRepository {
         membershipId: membership.id,
         email: membership.user.email,
         role: membership.role,
-        enrollments: scoped.length,
-        activeEnrollments: scoped.filter(({ status }) => status === 'ACTIVE' || status === 'PAUSED').length,
-        completedEnrollments: scoped.filter(({ status }) => status === 'COMPLETED').length,
-        activityCompletions: scoped.reduce((total, enrollment) => total + enrollment._count.activityCompletions, 0),
-        dailyRecords: scoped.reduce((total, enrollment) => total + enrollment._count.dailyRecords, 0),
+        ...memberSummary(scoped),
       }
     })
     return {
@@ -134,13 +154,15 @@ export class PrismaReportingRepository extends ReportingRepository {
 
   async findTenant(context: CurrentTenantContext): Promise<TenantReport> {
     await this.assertActiveActor(context, ['CEO'])
-    const [activeMembers, enrollments] = await Promise.all([
-      this.prisma.tenantMembership.count({
+    const [memberships, enrollments] = await Promise.all([
+      this.prisma.tenantMembership.findMany({
         where: {
           tenantId: context.tenantId,
           status: 'ACTIVE',
           user: { status: 'ACTIVE' },
         },
+        select: { id: true, role: true, user: { select: { email: true } } },
+        orderBy: { id: 'asc' },
       }),
       this.prisma.enrollment.findMany({
         where: {
@@ -148,6 +170,7 @@ export class PrismaReportingRepository extends ReportingRepository {
           membership: { status: 'ACTIVE', user: { status: 'ACTIVE' } },
         },
         select: {
+          ...memberEnrollmentSelect,
           programId: true,
           programVersionId: true,
           status: true,
@@ -156,6 +179,16 @@ export class PrismaReportingRepository extends ReportingRepository {
         },
       }),
     ])
+    const byMember = new Map<string, typeof enrollments>()
+    for (const enrollment of enrollments) {
+      const entries = byMember.get(enrollment.membershipId) ?? []
+      entries.push(enrollment)
+      byMember.set(enrollment.membershipId, entries)
+    }
+    const members = memberships.map((membership) => ({
+      membershipId: membership.id, email: membership.user.email, role: membership.role,
+      ...memberSummary(byMember.get(membership.id) ?? []),
+    }))
     const programsByVersion = new Map<string, TenantProgramReport>()
     for (const enrollment of enrollments) {
       const key = `${enrollment.programId}:${enrollment.programVersionId ?? 'unversioned'}`
@@ -181,7 +214,7 @@ export class PrismaReportingRepository extends ReportingRepository {
     return {
       tenantId: context.tenantId,
       summary: {
-        activeMembers,
+        activeMembers: members.length,
         enrollments: enrollments.length,
         activeEnrollments: enrollments.filter(({ status }) => status === 'ACTIVE' || status === 'PAUSED').length,
         completedEnrollments: enrollments.filter(({ status }) => status === 'COMPLETED').length,
@@ -189,6 +222,7 @@ export class PrismaReportingRepository extends ReportingRepository {
         dailyRecords: programs.reduce((total, program) => total + program.dailyRecords, 0),
       },
       programs,
+      members,
     }
   }
 

@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppLayout } from './app/layouts/AppLayout'
+import { SiteContacts } from './app/SiteContacts'
 import { DashboardPage } from './modules/dashboard/DashboardPage'
 import { DisciplineTrackerPage } from './modules/discipline-tracker/pages/DisciplineTrackerPage'
 import { DailyRitualPage } from './modules/daily-ritual/pages/DailyRitualPage'
@@ -7,6 +8,7 @@ import { GamificationPage } from './modules/gamification/pages/GamificationPage'
 import { MissionsPage } from './modules/discipline-content/pages/MissionsPage'
 import { ProtocolPage } from './modules/discipline-content/pages/ProtocolPage'
 import { LoginPage } from './modules/auth/LoginPage'
+import { PasswordRecoveryPage } from './modules/auth/PasswordRecoveryPage'
 import { InvitationAcceptancePage } from './modules/invitations/InvitationAcceptancePage'
 import { ProfilePage } from './modules/profile/ProfilePage'
 import { ProgramsPage } from './modules/programs/ProgramsPage'
@@ -48,6 +50,8 @@ function App() {
     <GamificationProvider key={tenantScopeKey(session.tenant?.id)}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/recuperar-senha" element={<PasswordRecoveryPage key="request" />} />
+        <Route path="/redefinir-senha" element={<PasswordRecoveryPage key="reset" reset />} />
         <Route path="/convites/aceitar" element={<InvitationAcceptancePage />} />
         <Route path="/plataforma" element={<RequirePlatformSession><PlatformAdministrationPage /></RequirePlatformSession>} />
         <Route path="/app" element={<RequireSession><AppLayout /></RequireSession>}>
@@ -72,6 +76,7 @@ function App() {
         </Route>
         <Route path="*" element={<Navigate to="/app" replace />} />
       </Routes>
+      <SiteContacts />
     </GamificationProvider>
   )
 }

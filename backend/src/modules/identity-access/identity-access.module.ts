@@ -1,4 +1,11 @@
 import { Module } from '@nestjs/common'
+import { SmtpClient } from '../invitations/application/smtp-client.js'
+import { NodemailerSmtpClient } from '../invitations/infrastructure/nodemailer-smtp.client.js'
+import { PasswordRecoveryUseCase } from './application/password-recovery.use-case.js'
+import { PasswordRecoveryRepository } from './application/password-recovery.repository.js'
+import { PasswordRecoveryDelivery } from './application/password-recovery.delivery.js'
+import { PrismaPasswordRecoveryRepository } from './infrastructure/prisma-password-recovery.repository.js'
+import { PasswordRecoveryEmailDelivery } from './infrastructure/password-recovery-email.delivery.js'
 import { BootstrapSuperAdminUseCase } from './application/bootstrap-super-admin.use-case.js'
 import { AccessTokenService } from './application/access-token.js'
 import { AuthenticatedPrincipalRepository } from './application/authenticated-principal.repository.js'
@@ -29,6 +36,10 @@ import { AuthenticationGuard } from './http/authentication.guard.js'
 @Module({
   controllers: [AuthController],
   providers: [
+    PasswordRecoveryUseCase,
+    { provide: PasswordRecoveryRepository, useClass: PrismaPasswordRecoveryRepository },
+    { provide: PasswordRecoveryDelivery, useClass: PasswordRecoveryEmailDelivery },
+    { provide: SmtpClient, useClass: NodemailerSmtpClient },
     CreateUserUseCase,
     BootstrapSuperAdminUseCase,
     CreateSessionUseCase,

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import userEvent from '@testing-library/user-event'
 import { ProgramsPage } from './programs/ProgramsPage'
 import { MissionsPage } from './discipline-content/pages/MissionsPage'
 import { GamificationPage } from './gamification/pages/GamificationPage'
@@ -28,6 +29,22 @@ describe('Accessible loading boundaries', () => {
       timer: { running: false, remainingSeconds: 1800, completedCycles: 0 }, checks: {},
       scope: 'tenant', availableTeams: [], canManage: true, canManageTeams: true,
     }
+  })
+
+  it('keeps protocol identity and lets the user leave while the cycle is pending', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter initialEntries={['/app/programas/projeto-66']}>
+      <Routes>
+        <Route path="/app/programas/projeto-66" element={<Projeto66Layout />} />
+        <Route path="/app/programas" element={<h1>Seus programas</h1>} />
+      </Routes>
+    </MemoryRouter>)
+    expect(screen.getByRole('heading', { name: 'Preparando sua jornada' })).not.toBeNull()
+    expect(screen.getByText('77')).not.toBeNull()
+    expect(screen.getByRole('status').textContent).toBe('Carregando seu ciclo…')
+    await user.click(screen.getByRole('link', { name: '‹ Disciplina PRO' }))
+    expect(screen.getByRole('heading', { name: 'Seus programas' })).not.toBeNull()
+    expect(screen.queryByRole('status')).toBeNull()
   })
 
   it.each([

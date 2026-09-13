@@ -91,7 +91,7 @@ export function InvitationAcceptancePage() {
   } else if (!token) {
     content = <>
       <p role="alert">Link de convite inválido ou incompleto. Abra o botão do e-mail mais recente ou solicite um novo convite ao administrador.</p>
-      <a href="/login">Voltar ao login</a>
+      <a className="login-recovery-link" href="/login">Voltar ao login</a>
     </>
   } else if (session.status === 'loading') {
     content = <output>Verificando sessão…</output>

@@ -121,6 +121,9 @@ model User {
   email           String             @db.VarChar(320)
   normalizedEmail String             @unique @map("normalized_email") @db.VarChar(320)
   passwordHash    String             @map("password_hash") @db.Text
+  passwordResetHash String?           @unique @map("password_reset_hash") @db.Char(64)
+  passwordResetExpiresAt DateTime?    @map("password_reset_expires_at") @db.Timestamptz(3)
+  passwordResetRequestedAt DateTime?  @map("password_reset_requested_at") @db.Timestamptz(3)
   status          UserStatus         @default(ACTIVE)
   createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)

@@ -10,6 +10,7 @@ export function useAdministrationInsights({ canManageTeams, teams, memberships, 
     return (actor?.teams ?? []).filter(({ role }) => role === 'MANAGER').map(({ team }) => team)
   }, [actorMembershipId, canManageTeams, memberships, teams])
   const [scope, setScope] = useState(() => canManageTeams ? 'tenant' : availableTeams[0]?.id ?? '')
+  const scopeKey = `${session.tenant?.id}:${scope || availableTeams[0]?.id || ''}`
   const [state, setState] = useState({ status: 'loading', report: null, audit: null, error: null })
   const repository = useMemo(() => createTenantAdministrationHttpRepository({
     baseUrl: '/api',
@@ -20,7 +21,7 @@ export function useAdministrationInsights({ canManageTeams, teams, memberships, 
   const load = useCallback(async () => {
     const effectiveScope = scope || availableTeams[0]?.id
     if (!effectiveScope) {
-      setState({ status: 'empty', report: null, audit: null, error: null })
+      setState({ scopeKey, status: 'empty', report: null, audit: null, error: null })
       return null
     }
     setState((current) => ({ ...current, status: 'loading', error: null }))
@@ -28,30 +29,30 @@ export function useAdministrationInsights({ canManageTeams, teams, memberships, 
       const [report, audit] = effectiveScope === 'tenant'
         ? await Promise.all([repository.getTenantReport(), repository.getTenantAudit()])
         : await Promise.all([repository.getTeamReport(effectiveScope), repository.getTeamAudit(effectiveScope)])
-      const next = { status: 'ready', report, audit, error: null }
+      const next = { scopeKey, status: 'ready', report, audit, error: null }
       setState(next)
       return next
     } catch (error) {
-      setState({ status: 'error', report: null, audit: null, error })
+      setState({ scopeKey, status: 'error', report: null, audit: null, error })
       throw error
     }
-  }, [availableTeams, repository, scope])
+  }, [availableTeams, repository, scope, scopeKey])
 
   useEffect(() => {
     let active = true
     const effectiveScope = scope || availableTeams[0]?.id
     if (!effectiveScope) {
-      Promise.resolve().then(() => { if (active) setState({ status: 'empty', report: null, audit: null, error: null }) })
+      Promise.resolve().then(() => { if (active) setState({ scopeKey, status: 'empty', report: null, audit: null, error: null }) })
       return () => { active = false }
     }
     const reads = effectiveScope === 'tenant'
       ? [repository.getTenantReport(), repository.getTenantAudit()]
       : [repository.getTeamReport(effectiveScope), repository.getTeamAudit(effectiveScope)]
     Promise.all(reads)
-      .then(([report, audit]) => { if (active) setState({ status: 'ready', report, audit, error: null }) })
-      .catch((error) => { if (active) setState({ status: 'error', report: null, audit: null, error }) })
+      .then(([report, audit]) => { if (active) setState({ scopeKey, status: 'ready', report, audit, error: null }) })
+      .catch((error) => { if (active) setState({ scopeKey, status: 'error', report: null, audit: null, error }) })
     return () => { active = false }
-  }, [availableTeams, repository, scope])
+  }, [availableTeams, repository, scope, scopeKey])
 
-  return { ...state, scope: scope || availableTeams[0]?.id || '', setScope, availableTeams, reload: load }
+  return { ...state, status: state.scopeKey === scopeKey ? state.status : 'loading', scope: scope || availableTeams[0]?.id || '', setScope, availableTeams, reload: load }
 }

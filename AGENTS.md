@@ -1,3 +1,8 @@
+## HTML semântico e descoberta
+
+- Use HTML semântico nas páginas: `main` para o conteúdo principal, `nav` para navegação, títulos hierárquicos, links para navegação e botões para ações. Associe labels aos campos de formulário.
+- Ao criar ou alterar rotas públicas, revise título, descrição, canonical, sitemap e regras de indexação. Inclua no sitemap somente URLs públicas canônicas; mantenha áreas autenticadas, convites e recuperação de senha fora da indexação.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

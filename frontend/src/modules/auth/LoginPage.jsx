@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAppContext } from '../../app/providers/app-context'
 
 export function LoginPage() {
@@ -41,6 +41,7 @@ export function LoginPage() {
         <label>E-mail<input required type="email" autoComplete="email" value={email} placeholder="voce@empresa.com.br" onChange={(event) => setEmail(event.target.value)} /></label>
         <label>Senha<input required type="password" autoComplete="current-password" value={password} placeholder="••••••••" onChange={(event) => setPassword(event.target.value)} /></label>
         <button className="button" disabled={submitting} type="submit">{submitting ? 'Entrando…' : 'Entrar'}</button>
+        <Link className="login-recovery-link" to="/recuperar-senha">Esqueci minha senha</Link>
         {message && <p role="alert">{message}</p>}
       </form>
     </main>

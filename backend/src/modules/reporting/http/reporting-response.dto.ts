@@ -31,6 +31,8 @@ export class PersonalReportResponseDto {
 }
 
 export class TeamMemberReportDto extends ObjectiveSummaryDto {
+  @ApiProperty() startedEnrollments!: number
+  @ApiProperty({ type: String, format: 'date-time', nullable: true }) lastObjectiveActivityAt!: Date | null
   @ApiProperty({ format: 'uuid' }) membershipId!: string
   @ApiProperty({ format: 'email' }) email!: string
   @ApiProperty({ enum: TENANT_ROLES }) role!: (typeof TENANT_ROLES)[number]
@@ -58,6 +60,7 @@ export class TenantSummaryDto extends ObjectiveSummaryDto {
 }
 
 export class TenantReportResponseDto {
+  @ApiProperty({ type: [TeamMemberReportDto] }) members!: TeamMemberReportDto[]
   @ApiProperty({ format: 'uuid' }) tenantId!: string
   @ApiProperty({ type: TenantSummaryDto }) summary!: TenantSummaryDto
   @ApiProperty({ type: [TenantProgramReportDto] }) programs!: TenantProgramReportDto[]
