@@ -12,7 +12,9 @@ export function RouteMetadata() {
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const path = pathname.replace(/\/+$/, '') || '/'
+    let end = pathname.length
+    while (end > 1 && pathname[end - 1] === '/') end -= 1
+    const path = pathname.slice(0, end) || '/'
     const indexable = path === '/login' || path === '/'
     document.title = titles[path] ?? 'Disciplina PRO'
     // The static shell advertises the public login URL. Other routes are not

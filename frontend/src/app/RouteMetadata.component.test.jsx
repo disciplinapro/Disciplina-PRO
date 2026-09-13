@@ -41,7 +41,12 @@ describe('RouteMetadata', () => {
     expect(robots()).toHaveLength(0)
   })
 
-  it.each(['/app', '/app/perfil', '/plataforma', '/convites/aceitar', '/redefinir-senha', '/inexistente'])(
+  it.each(['/login/', '/login///', '/'])('keeps the public entry indexable at %s', (path) => {
+    render(<MemoryRouter initialEntries={[path]}><RouteMetadata /></MemoryRouter>)
+    expect(document.head.querySelector('meta[name="robots"]').content).toBe('index, follow')
+  })
+
+  it.each(['/app', '/app/perfil', '/plataforma', '/convites/aceitar', '/redefinir-senha', '/recuperar-senha///', '/inexistente'])(
     'excludes %s from indexing', (path) => {
       render(<MemoryRouter initialEntries={[path]}><RouteMetadata /></MemoryRouter>)
       expect(document.head.querySelector('meta[name="robots"]').content).toBe('noindex, follow')

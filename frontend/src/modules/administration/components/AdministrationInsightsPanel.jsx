@@ -26,10 +26,21 @@ const formatDate = (value) => new Date(value).toLocaleString('pt-BR')
 const hasStarted = (member) => (member.startedEnrollments ?? member.activeEnrollments + member.completedEnrollments) > 0
 const hasActivity = (member) => member.activityCompletions > 0 || member.dailyRecords > 0
 
+function memberParticipation(member) {
+  if (hasActivity(member)) return 'Com participação registrada'
+  if (hasStarted(member)) return 'Iniciou, sem atividades registradas'
+  return 'Ainda não iniciou'
+}
+
+function auditActor(event) {
+  if (event.actor) return `${event.actor.email} · ${roleLabels[event.actor.role] ?? 'Membro'} (papel atual)`
+  if (event.actorType === 'SYSTEM') return 'Sistema'
+  if (event.actorType === 'PLATFORM_ACCESS') return 'Administração da plataforma'
+  return 'Autor não disponível'
+}
+
 function AuditEntry({ event }) {
-  const actor = event.actor
-    ? `${event.actor.email} · ${roleLabels[event.actor.role] ?? 'Membro'} (papel atual)`
-    : event.actorType === 'SYSTEM' ? 'Sistema' : event.actorType === 'PLATFORM_ACCESS' ? 'Administração da plataforma' : 'Autor não disponível'
+  const actor = auditActor(event)
   return <article>
     <div>
       <strong>{actionLabels[event.action] ?? 'Ação registrada'}{event.activityTitle ? `: ${event.activityTitle}` : ''}</strong>
@@ -84,7 +95,7 @@ export function AdministrationInsightsPanel({ administration }) {
       </div>
       {members && <div className="admin-report-members"><h3>Acompanhamento por pessoa</h3>
         {members.length ? members.map((member) => <article key={member.membershipId}>
-          <div><strong>{member.email}</strong><span>{roleLabels[member.role] ?? 'Membro'} · {hasActivity(member) ? 'Com participação registrada' : hasStarted(member) ? 'Iniciou, sem atividades registradas' : 'Ainda não iniciou'}</span>
+          <div><strong>{member.email}</strong><span>{roleLabels[member.role] ?? 'Membro'} · {memberParticipation(member)}</span>
             <span>Última atividade: {member.lastObjectiveActivityAt ? formatDate(member.lastObjectiveActivityAt) : 'Nenhuma registrada'}</span></div>
           <small>{member.activeEnrollments} ciclos em andamento ou pausados · {member.activityCompletions} tarefas · {member.dailyRecords} registros diários</small>
         </article>) : <p className="admin-empty">Nenhuma pessoa com acesso ativo neste escopo.</p>}

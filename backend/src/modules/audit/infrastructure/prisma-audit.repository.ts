@@ -118,7 +118,7 @@ export class PrismaAuditRepository extends AuditQueryRepository implements Audit
     const views = items.map(({ metadata, actorMembership, targetMembership, ...item }) => {
       const program = item.entityType === 'Enrollment' ? programs.get(item.entityId ?? '') : null
       const activityId = metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata.activityId : null
-      const person = (membership: typeof actorMembership) => membership && membership.tenantId === tenantId
+      const person = (membership: typeof actorMembership) => membership?.tenantId === tenantId
         ? { email: membership.user.email, role: membership.role } : null
       return {
         ...item,
