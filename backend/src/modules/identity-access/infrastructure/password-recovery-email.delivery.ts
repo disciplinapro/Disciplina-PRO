@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { brandedEmail, escapeEmailHtml } from '../../../email/branded-email.js'
 import type { Environment } from '../../../config/environment.js'
 import { SmtpClient } from '../../invitations/application/smtp-client.js'
 import { PasswordRecoveryDelivery } from '../application/password-recovery.delivery.js'
@@ -18,13 +19,16 @@ export class PasswordRecoveryEmailDelivery extends PasswordRecoveryDelivery {
     }
     const link = new URL('/redefinir-senha', this.config.get('FRONTEND_URL', { infer: true }))
     link.hash = `token=${token}`
-    const htmlLink = link.href.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+    const htmlLink = escapeEmailHtml(link.href)
     const message = {
       from: this.config.get(resend ? 'RESEND_FROM' : 'SMTP_FROM', { infer: true }),
       to: email,
       subject: 'Recupere sua senha — Disciplina PRO',
-      text: `Para redefinir sua senha, acesse: ${link.href}\n\nO link expira em 30 minutos e só pode ser usado uma vez. Se você não solicitou esta alteração, ignore este e-mail.`,
-      html: `<p><a href="${htmlLink}">Redefinir minha senha</a></p><p>O link expira em 30 minutos e só pode ser usado uma vez.</p><p>Se você não solicitou esta alteração, ignore este e-mail.</p>`,
+      ...brandedEmail({
+        frontendUrl: link.href,
+        text: `Para redefinir sua senha, acesse: ${link.href}\n\nO link expira em 30 minutos e só pode ser usado uma vez. Se você não solicitou esta alteração, ignore este e-mail.`,
+        html: `<p><a href="${htmlLink}">Redefinir minha senha</a></p><p>O link expira em 30 minutos e só pode ser usado uma vez.</p><p>Se você não solicitou esta alteração, ignore este e-mail.</p>`,
+      }),
     }
     if (!resend) return this.smtp.send(message)
     const response = await fetch('https://api.resend.com/emails', {

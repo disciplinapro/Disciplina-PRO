@@ -22,6 +22,9 @@ describe('PasswordRecoveryEmailDelivery', () => {
     expect(message.text).toContain(`https://app.example.test/redefinir-senha#token=${'a'.repeat(43)}`)
     expect(message.text).toContain('30 minutos')
     expect(message.to).toBe('person@example.test')
+    expect(message.html).toContain('src="https://app.example.test/email/main.jpeg"')
+    expect(message.html).toContain('Equipe Disciplina PRO')
+    expect(message.text).toContain('suporte@disciplinapro.com.br')
   })
 
   it('does not send when disabled or to a disallowed Resend test recipient', async () => {
@@ -39,6 +42,9 @@ describe('PasswordRecoveryEmailDelivery', () => {
     const { delivery, smtp } = setup({ INVITATION_EMAIL_PROVIDER: 'resend', DEPLOYMENT_STAGE: 'production', RESEND_API_KEY: 'test-key' })
     await delivery.send('person@example.test', 'a'.repeat(43))
     expect(smtp.send).not.toHaveBeenCalled()
+    const payload = JSON.parse(fetch.mock.calls[0][1]?.body as string) as { html: string; text: string }
+    expect(payload.html).toContain('/email/main.jpeg')
+    expect(payload.text).toContain('Equipe Disciplina PRO')
     expect(fetch).toHaveBeenCalledWith('https://api.resend.com/emails', expect.objectContaining({ method: 'POST' }))
     fetch.mockResolvedValueOnce(new Response('{}', { status: 503 }))
     await expect(delivery.send('person@example.test', 'b'.repeat(43))).rejects.toThrow('EMAIL_REJECTED')

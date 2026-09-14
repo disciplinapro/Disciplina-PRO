@@ -62,7 +62,7 @@ describe('invitation administration use cases', () => {
       tokenHash: 'a'.repeat(64),
       expiresAt: new Date('2026-07-26T12:00:00.000Z'),
     }))
-    expect(delivery.send).toHaveBeenCalledWith(expect.objectContaining({ invitationId: INVITATION_ID, token: 'plain-secret' }))
+    expect(delivery.send).toHaveBeenCalledWith(expect.objectContaining({ invitationId: INVITATION_ID, token: 'plain-secret', includeWelcomeCard: true }))
     expect(result).toMatchObject({ id: INVITATION_ID, deliveryStatus: 'SENT' })
     expect(JSON.stringify(result)).not.toContain('plain-secret')
   })
@@ -79,6 +79,7 @@ describe('invitation administration use cases', () => {
     const { repository, tokens, delivery } = collaborators()
     repository.resendTenant.mockResolvedValue(record)
     const result = await new ResendInvitationUseCase(repository, tokens, delivery).execute(context, INVITATION_ID)
+    expect(delivery.send).toHaveBeenCalledWith(expect.objectContaining({ includeWelcomeCard: false }))
     expect(repository.resendTenant).toHaveBeenCalledWith(expect.objectContaining({ invitationId: INVITATION_ID, tokenHash: 'a'.repeat(64) }))
     expect(result).toMatchObject({ deliveryStatus: 'SENT' })
   })
@@ -96,6 +97,7 @@ describe('invitation administration use cases', () => {
     await expect(useCase.execute({ platformAccessId: 'access-1', userId: 'user-1', platformRole: 'SUPER_ADMIN' }, TENANT_ID, {
       email: record.email,
     })).resolves.toMatchObject({ role: 'CEO', deliveryStatus: 'SENT' })
+    expect(delivery.send).toHaveBeenCalledWith(expect.objectContaining({ includeWelcomeCard: true }))
     expect(repository.createFirstCeo).toHaveBeenCalledWith(expect.objectContaining({ tenantId: TENANT_ID, actorPlatformAccessId: 'access-1' }))
   })
 })

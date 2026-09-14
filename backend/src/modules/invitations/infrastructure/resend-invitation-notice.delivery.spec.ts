@@ -18,6 +18,10 @@ describe('Resend administrator notices', () => {
     const options = request.mock.calls[0][1]
     expect(JSON.parse(options?.body as string)).toMatchObject({ to: notice.email })
     expect(options?.body).not.toContain('token=')
+    const payload = JSON.parse(options?.body as string) as { html: string; text: string }
+    expect(payload.html).toContain('/email/main.jpeg')
+    expect(payload.html).toContain('Equipe Disciplina PRO')
+    expect(payload.text).toContain('Equipe Disciplina PRO')
     expect(options?.headers).toEqual(request.mock.calls[1][1]?.headers)
     expect(options?.signal).toBeInstanceOf(AbortSignal)
   })

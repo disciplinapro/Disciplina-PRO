@@ -34,12 +34,13 @@ abstract class InvitationWriter {
     return { ...this.tokens.generate(), expiresAt: new Date(now.getTime() + INVITATION_TTL_MS) }
   }
 
-  protected async deliver(invitation: InvitationRecord, token: string) {
+  protected async deliver(invitation: InvitationRecord, token: string, includeWelcomeCard = false) {
     const deliveryStatus = await this.delivery.send({
       invitationId: invitation.id,
       email: invitation.email,
       token,
       expiresAt: invitation.expiresAt,
+      includeWelcomeCard,
     }).catch(() => 'FAILED' as const)
     return publicInvitation(invitation, deliveryStatus)
   }
@@ -75,7 +76,7 @@ export class CreateInvitationUseCase extends InvitationWriter {
       expiresAt: token.expiresAt,
       now,
     })
-    return this.deliver(invitation, token.plainText)
+    return this.deliver(invitation, token.plainText, true)
   }
 }
 
@@ -133,6 +134,6 @@ export class CreateFirstCeoInvitationUseCase extends InvitationWriter {
       expiresAt: token.expiresAt,
       now,
     })
-    return this.deliver(invitation, token.plainText)
+    return this.deliver(invitation, token.plainText, true)
   }
 }
