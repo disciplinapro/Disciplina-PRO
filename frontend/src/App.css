@@ -32,3 +32,9 @@ body{background:var(--preto);color:var(--branco);font-family:Inter,sans-serif}.a
 .site-contacts a:hover{color:var(--vermelho-texto)}
 .site-contacts a:focus-visible{outline:2px solid var(--vermelho);outline-offset:3px}
 .app-shell:has(.p66-app)+.site-contacts{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
+.profile-privacy{margin-top:16px;background:var(--carvao);border:1px solid var(--linha);border-left:4px solid var(--ouro);border-radius:6px;padding:20px}
+.profile-privacy h2{font:400 24px Anton;text-transform:uppercase;margin:7px 0}
+.profile-privacy p{max-width:760px;color:var(--cinza);line-height:1.55}
+.profile-delete-private{min-height:44px}
+.profile-private-message{color:var(--verde)!important}
+.profile-private-message.error{color:var(--vermelho-texto)!important}

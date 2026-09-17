@@ -1,12 +1,11 @@
-import { Controller, Get, NotFoundException, Param, ParseUUIDPipe, Query } from '@nestjs/common'
+import { Controller, Get, NotFoundException, Param, ParseUUIDPipe } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import type { CurrentTenantContext } from '../../organizations/application/organization-context.repository.js'
 import { TENANT_PERMISSIONS } from '../../organizations/domain/tenant-permissions.js'
 import { CurrentTenant } from '../../organizations/http/current-organization-context.decorators.js'
 import { RequireTenantPermissions } from '../../organizations/http/organization-route.decorators.js'
-import { GetInactiveMembersReportUseCase, GetPersonalReportUseCase, GetTeamReportUseCase, GetTenantReportUseCase } from '../application/reporting.use-cases.js'
-import { InactiveMembersQueryDto } from './reporting.dto.js'
-import { InactiveMembersReportResponseDto, PersonalReportResponseDto, TeamReportResponseDto, TenantReportResponseDto } from './reporting-response.dto.js'
+import { GetInactiveParticipantsReportUseCase, GetPersonalReportUseCase, GetTeamReportUseCase, GetTenantReportUseCase } from '../application/reporting.use-cases.js'
+import { InactiveParticipantsReportResponseDto, PersonalReportResponseDto, TeamReportResponseDto, TenantReportResponseDto } from './reporting-response.dto.js'
 
 @ApiTags('Reporting')
 @Controller('reports')
@@ -15,12 +14,12 @@ export class ReportingController {
     private readonly getPersonalReport: GetPersonalReportUseCase,
     private readonly getTeamReport: GetTeamReportUseCase,
     private readonly getTenantReport: GetTenantReportUseCase,
-    private readonly getInactiveMembersReport: GetInactiveMembersReportUseCase,
+    private readonly getInactiveParticipantsReport: GetInactiveParticipantsReportUseCase,
   ) {}
 
   @Get('me')
   @RequireTenantPermissions(TENANT_PERMISSIONS.REPORT_READ_SELF)
-  @ApiOperation({ summary: 'Retorna métricas objetivas da membership atual' })
+  @ApiOperation({ summary: 'Retorna métricas detalhadas apenas para a própria pessoa' })
   @ApiOkResponse({ type: PersonalReportResponseDto })
   mine(@CurrentTenant() context: CurrentTenantContext) {
     return this.getPersonalReport.execute(context)
@@ -28,7 +27,7 @@ export class ReportingController {
 
   @Get('teams/:teamId')
   @RequireTenantPermissions(TENANT_PERMISSIONS.REPORT_READ_TEAM)
-  @ApiOperation({ summary: 'Retorna métricas objetivas dos membros ativos de um time autorizado' })
+  @ApiOperation({ summary: 'Retorna indicadores agregados e protegidos de um time' })
   @ApiOkResponse({ type: TeamReportResponseDto })
   async team(
     @CurrentTenant() context: CurrentTenantContext,
@@ -41,7 +40,7 @@ export class ReportingController {
 
   @Get('tenant')
   @RequireTenantPermissions(TENANT_PERMISSIONS.REPORT_READ_TENANT)
-  @ApiOperation({ summary: 'Retorna agregações objetivas do tenant atual' })
+  @ApiOperation({ summary: 'Retorna indicadores agregados e protegidos da organização' })
   @ApiOkResponse({ type: TenantReportResponseDto })
   tenant(@CurrentTenant() context: CurrentTenantContext) {
     return this.getTenantReport.execute(context)
@@ -49,12 +48,9 @@ export class ReportingController {
 
   @Get('inactive-members')
   @RequireTenantPermissions(TENANT_PERMISSIONS.REPORT_READ_TENANT)
-  @ApiOperation({ summary: 'Lista memberships sem fatos objetivos desde o instante informado' })
-  @ApiOkResponse({ type: InactiveMembersReportResponseDto })
-  inactiveMembers(
-    @CurrentTenant() context: CurrentTenantContext,
-    @Query() query: InactiveMembersQueryDto,
-  ) {
-    return this.getInactiveMembersReport.execute(context, new Date(query.inactiveSince))
+  @ApiOperation({ summary: 'Retorna somente a quantidade agregada de participantes inativos há 30 dias' })
+  @ApiOkResponse({ type: InactiveParticipantsReportResponseDto })
+  inactiveParticipants(@CurrentTenant() context: CurrentTenantContext) {
+    return this.getInactiveParticipantsReport.execute(context)
   }
 }

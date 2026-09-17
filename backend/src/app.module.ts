@@ -28,6 +28,7 @@ import { ReportingModule } from './modules/reporting/reporting.module.js'
 import { TrackerModule } from './modules/tracker/tracker.module.js'
 import { RitualModule } from './modules/ritual/ritual.module.js'
 import { MissionsModule } from './modules/missions/missions.module.js'
+import { PrivacyModule } from './modules/privacy/privacy.module.js'
 
 const moduleDirectory = dirname(fileURLToPath(import.meta.url))
 const sourceEnvironmentPath = resolve(moduleDirectory, '../../.env')
@@ -50,6 +51,7 @@ const environmentPath = existsSync(sourceEnvironmentPath) ? sourceEnvironmentPat
     RitualModule,
     MissionsModule,
     ExecutionModule,
+    PrivacyModule,
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<Environment, true>) => [{ ttl: config.get('RATE_LIMIT_TTL_MS', { infer: true }), limit: config.get('RATE_LIMIT_MAX', { infer: true }) }],

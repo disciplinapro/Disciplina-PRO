@@ -20,6 +20,16 @@ const publicAuditSelect = {
   targetMembership: { select: { tenantId: true, role: true, user: { select: { email: true } } } },
 } satisfies Prisma.AuditEventSelect
 
+const EMPLOYER_HISTORY_EXCLUDED_ACTIONS = [
+  'PRIVATE_RESPONSE_CREATED',
+  'PRIVATE_RESPONSE_REPLACED',
+  'DAILY_RECORD_SUBMITTED',
+  'ACTIVITY_COMPLETION_RECORDED',
+  'ACTIVITY_COMPLETED',
+  'ENROLLMENT_STARTED',
+  'ENROLLMENT_COMPLETED',
+] as const
+
 @Injectable()
 export class PrismaAuditRepository extends AuditQueryRepository implements AuditWriter<Prisma.TransactionClient> {
   constructor(private readonly prisma: PrismaService) { super() }
@@ -64,6 +74,7 @@ export class PrismaAuditRepository extends AuditQueryRepository implements Audit
     const teamMembershipIds = scope.memberships.map(({ id }) => id)
     return this.page({
       tenantId: context.tenantId,
+      action: { notIn: [...EMPLOYER_HISTORY_EXCLUDED_ACTIONS] },
       OR: [
         { actorMembershipId: { in: membershipIds } },
         { targetMembershipId: { in: membershipIds } },
@@ -75,7 +86,7 @@ export class PrismaAuditRepository extends AuditQueryRepository implements Audit
 
   async findTenant(context: CurrentTenantContext, input: AuditPageInput) {
     await this.assertActiveActor(context, 'CEO')
-    return this.page({ tenantId: context.tenantId }, input)
+    return this.page({ tenantId: context.tenantId, action: { notIn: [...EMPLOYER_HISTORY_EXCLUDED_ACTIONS] } }, input)
   }
 
   async recordDerived(transaction: Prisma.TransactionClient, event: InternalEventEnvelope, fact: DerivedAuditFact) {

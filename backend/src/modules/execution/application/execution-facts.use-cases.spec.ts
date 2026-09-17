@@ -50,9 +50,15 @@ describe('execution facts use cases', () => {
 
   it('validates objective and private payload shapes before persistence', () => {
     const facts = {} as ObjectiveExecutionFactsRepository
-    const responses = {} as PrivateExecutionResponseRepository
+    const responses = { put: jest.fn() } as unknown as PrivateExecutionResponseRepository
     expect(() => new RecordDailyUseCase(facts).execute(context, 'enrollment', [])).toThrow(InvalidExecutionDataError)
     expect(() => new PutPrivateResponseUseCase(responses).execute(context, 'enrollment', 'activity', [] as never)).toThrow(InvalidExecutionDataError)
+    expect(() => new PutPrivateResponseUseCase(responses).execute(context, 'enrollment', 'activity', {
+      emotion: null,
+      gratitude: ['', '  '],
+      recordedAt: new Date().toISOString(),
+    })).toThrow(InvalidExecutionDataError)
+    expect(() => new PutPrivateResponseUseCase(responses).execute(context, 'enrollment', 'activity', { completed: false })).not.toThrow()
   })
 
   it('delegates private writes and maps missing private reads', async () => {

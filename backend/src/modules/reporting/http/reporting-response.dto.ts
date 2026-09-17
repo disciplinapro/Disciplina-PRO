@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 
 const ENROLLMENT_STATUSES = ['AVAILABLE', 'ACTIVE', 'PAUSED', 'COMPLETED', 'ABANDONED'] as const
-const TENANT_ROLES = ['USER', 'MANAGER', 'CEO'] as const
 
 export class ObjectiveSummaryDto {
   @ApiProperty() enrollments!: number
@@ -30,52 +29,45 @@ export class PersonalReportResponseDto {
   @ApiProperty({ type: [PersonalProgramReportDto] }) programs!: PersonalProgramReportDto[]
 }
 
-export class TeamMemberReportDto extends ObjectiveSummaryDto {
-  @ApiProperty() startedEnrollments!: number
-  @ApiProperty({ type: String, format: 'date-time', nullable: true }) lastObjectiveActivityAt!: Date | null
-  @ApiProperty({ format: 'uuid' }) membershipId!: string
-  @ApiProperty({ format: 'email' }) email!: string
-  @ApiProperty({ enum: TENANT_ROLES }) role!: (typeof TENANT_ROLES)[number]
-}
-
-export class TeamSummaryDto extends ObjectiveSummaryDto {
-  @ApiProperty() members!: number
+export class AggregatedParticipationSummaryDto {
+  @ApiProperty({ nullable: true, description: 'Suprimido quando o grupo ou seu complemento tem menos de 10 participantes.' }) participants!: number | null
+  @ApiProperty({ nullable: true }) startedParticipants!: number | null
+  @ApiProperty({ nullable: true }) activeParticipants!: number | null
+  @ApiProperty({ nullable: true }) completedParticipants!: number | null
+  @ApiProperty({ nullable: true }) participantsWithActivity!: number | null
 }
 
 export class TeamReportResponseDto {
   @ApiProperty({ format: 'uuid' }) teamId!: string
   @ApiProperty() name!: string
-  @ApiProperty({ type: TeamSummaryDto }) summary!: TeamSummaryDto
-  @ApiProperty({ type: [TeamMemberReportDto] }) members!: TeamMemberReportDto[]
+  @ApiProperty() minimumGroupSize!: number
+  @ApiProperty() suppressed!: boolean
+  @ApiProperty({ type: AggregatedParticipationSummaryDto }) summary!: AggregatedParticipationSummaryDto
 }
 
-export class TenantProgramReportDto extends ObjectiveSummaryDto {
+export class TenantProgramReportDto {
   @ApiProperty({ format: 'uuid' }) programId!: string
   @ApiProperty({ format: 'uuid', nullable: true }) programVersionId!: string | null
   @ApiProperty({ nullable: true }) title!: string | null
-}
-
-export class TenantSummaryDto extends ObjectiveSummaryDto {
-  @ApiProperty() activeMembers!: number
+  @ApiProperty() participants!: number
+  @ApiProperty({ nullable: true }) startedParticipants!: number | null
+  @ApiProperty({ nullable: true }) activeParticipants!: number | null
+  @ApiProperty({ nullable: true }) completedParticipants!: number | null
+  @ApiProperty({ nullable: true }) participantsWithActivity!: number | null
 }
 
 export class TenantReportResponseDto {
-  @ApiProperty({ type: [TeamMemberReportDto] }) members!: TeamMemberReportDto[]
   @ApiProperty({ format: 'uuid' }) tenantId!: string
-  @ApiProperty({ type: TenantSummaryDto }) summary!: TenantSummaryDto
+  @ApiProperty() minimumGroupSize!: number
+  @ApiProperty() suppressed!: boolean
+  @ApiProperty() programsSuppressed!: boolean
+  @ApiProperty({ type: AggregatedParticipationSummaryDto }) summary!: AggregatedParticipationSummaryDto
   @ApiProperty({ type: [TenantProgramReportDto] }) programs!: TenantProgramReportDto[]
 }
 
-export class InactiveMemberReportDto {
-  @ApiProperty({ format: 'uuid' }) membershipId!: string
-  @ApiProperty({ format: 'email' }) email!: string
-  @ApiProperty({ enum: TENANT_ROLES }) role!: (typeof TENANT_ROLES)[number]
-  @ApiProperty({ type: String, format: 'date-time' }) memberSince!: Date
-  @ApiProperty({ type: String, format: 'date-time', nullable: true }) lastObjectiveActivityAt!: Date | null
-}
-
-export class InactiveMembersReportResponseDto {
-  @ApiProperty({ type: String, format: 'date-time' }) inactiveSince!: Date
-  @ApiProperty() total!: number
-  @ApiProperty({ type: [InactiveMemberReportDto] }) members!: InactiveMemberReportDto[]
+export class InactiveParticipantsReportResponseDto {
+  @ApiProperty() windowDays!: number
+  @ApiProperty() minimumGroupSize!: number
+  @ApiProperty() suppressed!: boolean
+  @ApiProperty({ nullable: true }) inactiveParticipants!: number | null
 }

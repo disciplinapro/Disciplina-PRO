@@ -30,10 +30,11 @@ export class GetTenantReportUseCase {
 }
 
 @Injectable()
-export class GetInactiveMembersReportUseCase {
+export class GetInactiveParticipantsReportUseCase {
   constructor(private readonly repository: ReportingRepository) {}
 
-  execute(context: CurrentTenantContext, inactiveSince: Date) {
-    return this.repository.findInactiveMembers(context, inactiveSince)
+  execute(context: CurrentTenantContext, now = new Date()) {
+    const cutoff = new Date(now.getTime() - 30 * 86_400_000)
+    return this.repository.findInactiveParticipants(context, cutoff)
   }
 }

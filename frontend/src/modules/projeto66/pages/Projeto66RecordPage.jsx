@@ -53,7 +53,9 @@ export function Projeto66RecordPage() {
       const recordedAt = new Date().toISOString()
       if (!existing) await saveDailyRecord(day, { programDay: day, pillars, score, recordedAt })
       await saveChecklist(day, missions)
-      await savePrivateResponse(PROJETO66_ACTIVITY_KEYS.dailyReflection, { emotion, gratitude, recordedAt })
+      if (emotion !== null || gratitude.some((reflection) => reflection.trim().length > 0)) {
+        await savePrivateResponse(PROJETO66_ACTIVITY_KEYS.dailyReflection, { emotion, gratitude, recordedAt })
+      }
       setSaved(true)
     } catch {
       setSaveError('Não foi possível salvar o registro.')

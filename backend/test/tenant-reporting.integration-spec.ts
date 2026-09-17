@@ -7,7 +7,7 @@ import { PrismaService } from '../src/database/prisma.service.js'
 import { configureApp } from '../src/http/configure-app.js'
 import { CreateUserUseCase } from '../src/modules/identity-access/application/create-user.use-case.js'
 import type { CurrentTenantContext } from '../src/modules/organizations/application/organization-context.repository.js'
-import { GetInactiveMembersReportUseCase, GetTenantReportUseCase } from '../src/modules/reporting/application/reporting.use-cases.js'
+import { GetInactiveParticipantsReportUseCase, GetTenantReportUseCase } from '../src/modules/reporting/application/reporting.use-cases.js'
 
 describe('Tenant reporting integration', () => {
   let app: INestApplication
@@ -123,22 +123,19 @@ describe('Tenant reporting integration', () => {
     const report = await app.get(GetTenantReportUseCase).execute(ceoContext)
     expect(report).toMatchObject({
       tenantId: ceoContext.tenantId,
-      summary: { activeMembers: 5, enrollments: 3, activeEnrollments: 3, activityCompletions: 2, dailyRecords: 1 },
-      programs: [{ title: 'Programa', enrollments: 3, activityCompletions: 2, dailyRecords: 1 }],
+      minimumGroupSize: 10,
+      suppressed: true,
+      summary: { participants: null, startedParticipants: null, participantsWithActivity: null },
+      programs: [],
     })
     expect(JSON.stringify(report)).not.toContain(privateMarker)
     await expect(app.get(GetTenantReportUseCase).execute(managerContext)).rejects.toThrow('Contexto de reporting inválido')
   })
 
-  it('classifies only enrolled members existing at the explicit cutoff with no later objective fact', async () => {
-    const report = await app.get(GetInactiveMembersReportUseCase).execute(ceoContext, inactiveSince)
-    expect(report).toMatchObject({ inactiveSince, total: 1 })
-    expect(report.members).toEqual([
-      expect.objectContaining({
-        membershipId: inactiveMemberId,
-        lastObjectiveActivityAt: new Date('2026-07-20T12:00:00.000Z'),
-      }),
-    ])
+  it('suppresses the fixed inactivity metric when the participant cohort is too small', async () => {
+    const report = await app.get(GetInactiveParticipantsReportUseCase).execute(ceoContext, new Date('2026-09-01T00:00:00.000Z'))
+    expect(report).toMatchObject({ windowDays: 30, minimumGroupSize: 10, suppressed: true, inactiveParticipants: null })
+    expect(JSON.stringify(report)).not.toContain(inactiveMemberId)
     expect(JSON.stringify(report)).not.toContain(activeMemberId)
     expect(JSON.stringify(report)).not.toContain(privateMarker)
   })
@@ -150,11 +147,10 @@ describe('Tenant reporting integration', () => {
     const team = await api(`/teams/${teamId}`, managerToken).expect(200)
     await api(`/teams/${outsideTeamId}`, managerToken).expect(404)
     await api('/tenant', managerToken).expect(403)
-    await api(`/inactive-members?inactiveSince=${encodeURIComponent(inactiveSince.toISOString())}`, managerToken).expect(403)
+    await api('/inactive-members', managerToken).expect(403)
     const tenant = await api('/tenant', ceoToken).expect(200)
-    const inactive = await api(`/inactive-members?inactiveSince=${encodeURIComponent(inactiveSince.toISOString())}`, ceoToken).expect(200)
-    await api('/inactive-members', ceoToken).expect(400)
-    await api('/inactive-members?inactiveSince=invalid', ceoToken).expect(400)
+    const inactive = await api('/inactive-members', ceoToken).expect(200)
+    await api(`/inactive-members?inactiveSince=${encodeURIComponent(inactiveSince.toISOString())}`, ceoToken).expect(200)
     await api('/tenant', ceoToken, foreignTenantId).expect(403)
     const serialized = JSON.stringify([mine.body, team.body, tenant.body, inactive.body])
     expect(serialized).not.toContain(privateMarker)
@@ -176,7 +172,7 @@ describe('Tenant reporting integration', () => {
     }
     const schemas = JSON.stringify(document.components?.schemas)
     expect(schemas).toContain('PersonalReportResponseDto')
-    expect(schemas).toContain('InactiveMembersReportResponseDto')
+    expect(schemas).toContain('InactiveParticipantsReportResponseDto')
     expect(schemas).not.toContain('PrivateActivityResponse')
     expect(schemas).not.toContain('payload')
   })

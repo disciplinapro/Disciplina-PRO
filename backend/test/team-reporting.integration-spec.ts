@@ -106,17 +106,18 @@ describe('Team reporting integration', () => {
 
   afterAll(async () => app.close())
 
-  it('limits a manager to the actively managed team and returns objective member aggregates', async () => {
+  it('limits a manager to the actively managed team and suppresses a small group', async () => {
     const reporting = app.get(GetTeamReportUseCase)
     const report = await reporting.execute(managerContext, teamId)
     expect(report).toMatchObject({
       teamId,
       name: 'Managed',
-      summary: { members: 2, enrollments: 1, activeEnrollments: 1, activityCompletions: 1, dailyRecords: 1 },
+      minimumGroupSize: 10,
+      suppressed: true,
+      summary: { participants: null, startedParticipants: null, participantsWithActivity: null },
     })
-    expect(report?.members).toEqual(expect.arrayContaining([
-      expect.objectContaining({ membershipId: memberId, enrollments: 1, activityCompletions: 1, dailyRecords: 1 }),
-    ]))
+    expect(report).not.toHaveProperty('members')
+    expect(JSON.stringify(report)).not.toContain(memberId)
     expect(JSON.stringify(report)).not.toContain(privateMarker)
     await expect(reporting.execute(managerContext, outsideTeamId)).resolves.toBeNull()
     await expect(reporting.execute(managerContext, foreignTeamId)).resolves.toBeNull()
@@ -126,7 +127,8 @@ describe('Team reporting integration', () => {
     const reporting = app.get(GetTeamReportUseCase)
     await expect(reporting.execute(ceoContext, outsideTeamId)).resolves.toMatchObject({
       teamId: outsideTeamId,
-      summary: { members: 1, enrollments: 1, activityCompletions: 1 },
+      suppressed: true,
+      summary: { participants: null, participantsWithActivity: null },
     })
     await expect(reporting.execute(ceoContext, foreignTeamId)).resolves.toBeNull()
   })

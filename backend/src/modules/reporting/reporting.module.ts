@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ReportingRepository } from './application/reporting.repository.js'
-import { GetInactiveMembersReportUseCase, GetPersonalReportUseCase, GetTeamReportUseCase, GetTenantReportUseCase } from './application/reporting.use-cases.js'
+import { GetInactiveParticipantsReportUseCase, GetPersonalReportUseCase, GetTeamReportUseCase, GetTenantReportUseCase } from './application/reporting.use-cases.js'
 import { ReportingController } from './http/reporting.controller.js'
 import { PrismaReportingRepository } from './infrastructure/prisma-reporting.repository.js'
 
@@ -12,7 +12,7 @@ import { PrismaReportingRepository } from './infrastructure/prisma-reporting.rep
     GetPersonalReportUseCase,
     GetTeamReportUseCase,
     GetTenantReportUseCase,
-    GetInactiveMembersReportUseCase,
+    GetInactiveParticipantsReportUseCase,
   ],
 })
 export class ReportingModule {}
