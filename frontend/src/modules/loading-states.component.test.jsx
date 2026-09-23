@@ -52,7 +52,7 @@ describe('Accessible loading boundaries', () => {
     ['missions', MissionsPage, 'Carregando missões…'],
     ['gamification', GamificationPage, 'Atualizando progresso do servidor…'],
     ['ritual', DailyRitualPage, 'Carregando ritual…'],
-    ['insights', AdministrationInsightsPanel, 'Carregando indicadores objetivos…'],
+    ['insights', AdministrationInsightsPanel, 'Carregando indicadores agregados…'],
     ['administration', TenantAdministrationPage, 'Carregando estrutura da organização…'],
     ['Projeto 66', Projeto66Layout, 'Carregando seu ciclo…'],
   ])('%s announces loading and replaces it with an actionable error', (_name, Page, message) => {
