@@ -1,8 +1,22 @@
 # SEO e HTML semântico
 
-O frontend é uma SPA React. A entrada pública atual é `/login`; `/` redireciona pelo aplicativo até o login para visitantes. Não há página pública de apresentação. Os programas e o progresso exigem autenticação e não devem entrar no sitemap.
+## Página pública preparada — 24/09/2026
 
-## Arquivos
+O projeto agora gera uma página pública estática em `/` (`index.html`) com apresentação do Disciplina PRO, conteúdo legível sem JavaScript, título, descrição, canonical e `og:url` próprios. O sitemap passou a listar somente `https://www.disciplinapro.com.br/`. O login e as rotas de conta são `noindex`; a área autenticada continua fora da indexação. A SPA passa a ser entregue por `app.html` nas rotas de conta e autenticadas.
+
+Esta alteração foi validada localmente, mas ainda precisa ser publicada. Após a publicação, conferir a resposta HTTP e o HTML de `/`, `/login`, `/robots.txt` e `/sitemap.xml`. No Google Search Console, inspecionar a URL canônica `/`, executar o teste ao vivo, enviar o sitemap e solicitar indexação. O relatório de indexação e a URL inspecionada são a fonte para identificar eventuais motivos de exclusão; buscas públicas, inclusive `site:`, não comprovam sozinhas o estado do índice.
+
+O acesso à propriedade do Search Console e a publicação não fizeram parte desta alteração. A indexação e a posição nas buscas dependem do rastreamento e das decisões dos mecanismos de busca.
+
+Arquivos atuais: `frontend/index.html` é a página pública; `frontend/app.html` é o shell da SPA com `noindex`; `frontend/seo.config.js` gera sitemap e robots; `frontend/vercel.json` encaminha as rotas da SPA para `app.html`; `frontend/src/landing.css` apresenta a página pública.
+
+## Histórico: aceite e verificação publicada — 14/09/2026
+
+Implementação aceita por Eduardo conforme [registro da beta](ACEITE_BETA_2026-09-14.md). Conferência HTTPS no domínio oficial comprovou título, descrição, canonical e `og:url` no login, `robots.txt` válido, sitemap XML contendo apenas o login canônico e header `noindex, follow` na recuperação. Isso supera os defeitos de entrega pública observados em 13/09 e preservados abaixo. CI `34851806069` aprovado; Search Console/indexação e os demais headers não foram revalidados nesta rodada.
+
+Naquela publicação, o frontend era apenas uma SPA React. A entrada pública era `/login`; `/` redirecionava pelo aplicativo até o login para visitantes. Não havia página pública de apresentação. Os programas e o progresso exigem autenticação e não devem entrar no sitemap.
+
+## Arquivos da implementação de 14/09 (histórico)
 
 - `frontend/index.html`: idioma pt-BR, título, descrição e metadados Open Graph/Twitter disponíveis no HTML inicial.
 - `robots.txt` gerado por `frontend/seo.config.js`: permite rastrear HTML e assets; exclui chamadas de API. A mesma fonte atende desenvolvimento e build, sem cópia estática divergente.
@@ -22,11 +36,11 @@ O frontend é uma SPA React. A entrada pública atual é `/login`; `/` redirecio
 
 A tela de login já usa `main`, um `h1`, `form`, labels associados aos inputs e botão de envio. O layout autenticado usa `header`, `nav` identificado e `main`. Preserve essas estruturas, a hierarquia dos títulos e links reais ao alterar páginas.
 
-O conteúdo inicial ainda depende de JavaScript para renderizar. Uma página pública de apresentação com conteúdo real e HTML pré-renderizado pode ampliar a descoberta além do nome da aplicação. Não foram adicionados textos promocionais, dados estruturados ou imagens sem conteúdo correspondente. URLs inexistentes ainda seguem o redirecionamento genérico da SPA; uma página 404 com status HTTP apropriado permanece uma melhoria de roteamento.
+O conteúdo inicial ainda depende de JavaScript para renderizar. Não foram adicionados textos promocionais, dados estruturados ou imagens sem conteúdo correspondente. URLs inexistentes ainda seguem o redirecionamento genérico da SPA; a necessidade de uma resposta 404 apropriada deve ser avaliada a partir dos problemas observados na beta.
 
-Esta revisão local não comprova posição no Google, indexação atual ou aplicação das mudanças em produção. Metadados e sitemap ajudam a descoberta, mas não garantem indexação ou posição.
+O aceite de 14/09 comprova a entrega pública de metadados, robots e sitemap no recorte descrito acima. Search Console, indexação e posição no Google não foram comprovados.
 
-Na consulta pública de 13/09/2026, `https://www.disciplinapro.com.br/login` respondeu HTTP 200 com o título antigo e sem descrição/canonical. `/robots.txt` e `/sitemap.xml` retornaram o HTML da SPA, em vez dos formatos esperados. O build local desta revisão gera os dois arquivos e o canonical com o domínio oficial; a correção pública depende do deploy e da conferência dos endpoints após a publicação.
+Na consulta pública de 13/09/2026, `https://www.disciplinapro.com.br/login` respondeu HTTP 200 com o título antigo e sem descrição/canonical. `/robots.txt` e `/sitemap.xml` retornaram o HTML da SPA. Essa falha histórica foi superada pela verificação pública de 14/09 registrada no [aceite da beta](ACEITE_BETA_2026-09-14.md).
 
 Referências: [SEO para desenvolvedores](https://developers.google.com/search/docs/fundamentals/get-started-developers), [SEO em JavaScript](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [sitemaps](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap) e [headers da Vercel](https://vercel.com/docs/project-configuration/vercel-json).
 
@@ -40,7 +54,7 @@ Playwright e Chrome DevTools foram usados contra o domínio oficial e contra o b
 | Build local, mobile | 100 | 100 | 100 |
 | Build local após ajustes, desktop | 100 | 100 | 100 |
 
-As falhas de SEO publicadas são ausência de meta description e `robots.txt` retornando HTML. A categoria experimental Agentic Browsing marcou 67 por ausência de `llms.txt` válido; esse arquivo não foi adicionado nesta revisão de SEO de busca. A auditoria não mediu performance/Core Web Vitals.
+Em 13/09, as falhas publicadas eram ausência de meta description e `robots.txt` retornando HTML; ambas foram corrigidas na publicação conferida em 14/09. A auditoria não mediu performance/Core Web Vitals.
 
 Verificações locais concluídas:
 

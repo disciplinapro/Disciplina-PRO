@@ -12,17 +12,14 @@ export function seoAssets(siteUrl) {
     },
     '/sitemap.xml': {
       type: 'application/xml; charset=utf-8',
-      source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${origin}/login</loc></url>\n</urlset>\n`,
+      source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${origin}/</loc></url>\n</urlset>\n`,
     },
   }
 
   return {
     name: 'public-seo-assets',
-    transformIndexHtml() {
-      return [
-        { tag: 'link', attrs: { rel: 'canonical', href: `${origin}/login` }, injectTo: 'head' },
-        { tag: 'meta', attrs: { property: 'og:url', content: `${origin}/login` }, injectTo: 'head' },
-      ]
+    transformIndexHtml(html) {
+      return html.replaceAll('__SITE_ORIGIN__', origin)
     },
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
@@ -31,6 +28,13 @@ export function seoAssets(siteUrl) {
         if (!asset || !['GET', 'HEAD'].includes(request.method)) return next()
         response.setHeader('Content-Type', asset.type)
         response.end(request.method === 'HEAD' ? undefined : asset.source)
+      })
+      server.middlewares.use((request, _response, next) => {
+        const path = request.url?.split('?')[0]
+        if (path && path !== '/' && !path.includes('.') && !path.startsWith('/api/') && !path.startsWith('/@') && request.headers.accept?.includes('text/html')) {
+          request.url = '/app.html'
+        }
+        next()
       })
     },
     generateBundle() {

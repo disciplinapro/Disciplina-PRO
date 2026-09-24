@@ -2,23 +2,69 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10271b" />
-    <meta name="description" content="Disciplina PRO, da Spark Inteligência Corporativa: acesse programas de desenvolvimento, organize sua rotina e acompanhe sua evolução." />
+    <meta name="theme-color" content="#09090c" />
+    <meta name="description" content="Conheça o Disciplina PRO, plataforma de desenvolvimento da Spark Inteligência Corporativa para organizar hábitos, acompanhar programas e visualizar sua evolução." />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:site_name" content="Disciplina PRO" />
-    <meta property="og:title" content="Disciplina PRO | Programas de desenvolvimento" />
-    <meta property="og:description" content="Acesse seus programas de desenvolvimento, organize sua rotina e acompanhe sua evolução com o Disciplina PRO." />
+    <meta property="og:title" content="Disciplina PRO | Desenvolvimento com acompanhamento" />
+    <meta property="og:description" content="Programas de desenvolvimento, rotina e evolução em um só lugar." />
+    <meta property="og:url" content="__SITE_ORIGIN__/" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Disciplina PRO | Programas de desenvolvimento" />
-    <meta name="twitter:description" content="Acesse seus programas de desenvolvimento, organize sua rotina e acompanhe sua evolução com o Disciplina PRO." />
-    <title>Disciplina PRO | Programas de desenvolvimento</title>
+    <link rel="canonical" href="__SITE_ORIGIN__/" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <title>Disciplina PRO | Desenvolvimento com acompanhamento</title>
+    <link rel="stylesheet" href="/src/landing.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <header class="public-header">
+      <a class="public-brand" href="/" aria-label="Disciplina PRO, página inicial"><span aria-hidden="true">DP</span><strong>Disciplina PRO</strong></a>
+      <nav aria-label="Navegação principal">
+        <a href="#plataforma">A plataforma</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a class="public-header-login" href="/login">Entrar</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="public-hero" aria-labelledby="public-title">
+        <div class="public-hero-content">
+          <p class="public-eyebrow">Spark Inteligência Corporativa apresenta</p>
+          <h1 id="public-title">Disciplina <em>PRO</em></h1>
+          <p class="public-lead">Um espaço para transformar desenvolvimento em prática diária.</p>
+          <p>Acompanhe programas, organize sua rotina e veja sua evolução ao longo do caminho.</p>
+          <a class="public-button" href="/login">Acessar minha conta <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="public-hero-panel" aria-hidden="true">
+          <span>FOCO / ROTINA / EVOLUÇÃO</span>
+          <strong>01</strong>
+          <p>Um passo por dia.<br />Uma jornada com direção.</p>
+        </div>
+      </section>
+
+      <section class="public-section" id="plataforma" aria-labelledby="platform-title">
+        <p class="public-eyebrow">A plataforma</p>
+        <h2 id="platform-title">Seu desenvolvimento em um só lugar</h2>
+        <div class="public-grid">
+          <article><span>01</span><h3>Programas</h3><p>Acesse os programas de desenvolvimento disponíveis para sua organização.</p></article>
+          <article><span>02</span><h3>Rotina</h3><p>Registre atividades e acompanhe seus hábitos no dia a dia.</p></article>
+          <article><span>03</span><h3>Evolução</h3><p>Visualize seu progresso e retome a jornada de onde parou.</p></article>
+        </div>
+      </section>
+
+      <section class="public-section public-steps" id="como-funciona" aria-labelledby="steps-title">
+        <div>
+          <p class="public-eyebrow">Como funciona</p>
+          <h2 id="steps-title">Entre, pratique, acompanhe.</h2>
+        </div>
+        <p>O acesso é feito por convite da sua organização. Depois de entrar, você encontra os programas disponíveis, registra sua prática e acompanha sua evolução no Disciplina PRO.</p>
+      </section>
+    </main>
+
+    <footer class="public-footer">
+      <div><strong>Disciplina PRO</strong><span>Spark Inteligência Corporativa</span></div>
+      <nav aria-label="Links do rodapé"><a href="/login">Entrar</a><a href="mailto:suporte@disciplinapro.com.br">Suporte</a><a href="mailto:privacidade@disciplinapro.com.br">Privacidade</a></nav>
+    </footer>
   </body>
 </html>

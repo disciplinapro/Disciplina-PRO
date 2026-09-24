@@ -15,20 +15,11 @@ export function RouteMetadata() {
     let end = pathname.length
     while (end > 1 && pathname[end - 1] === '/') end -= 1
     const path = pathname.slice(0, end) || '/'
-    const indexable = path === '/login' || path === '/'
     document.title = titles[path] ?? 'Disciplina PRO'
-    // The static shell advertises the public login URL. Other routes are not
-    // duplicates of that page, so do not retain its canonical/share URL there.
-    const publicUrls = indexable ? [] : [...document.head.querySelectorAll('link[rel="canonical"], meta[property="og:url"]')]
-    publicUrls.forEach((element) => element.remove())
-    const robots = document.createElement('meta')
-    robots.name = 'robots'
-    robots.content = indexable ? 'index, follow' : 'noindex, follow'
-    document.head.appendChild(robots)
-    return () => {
-      robots.remove()
-      publicUrls.forEach((element) => document.head.appendChild(element))
-    }
+    // The SPA only serves account and authenticated routes. Its static shell
+    // carries noindex so direct requests are excluded before JavaScript runs.
+    const robots = document.head.querySelector('meta[name="robots"]')
+    if (robots) robots.content = 'noindex, follow'
   }, [pathname])
 
   return null
