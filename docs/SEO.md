@@ -12,7 +12,7 @@ Arquivos atuais: `frontend/index.html` é a página pública; `frontend/app.html
 
 ## Histórico: aceite e verificação publicada — 14/09/2026
 
-Implementação aceita por Eduardo conforme [registro da beta](ACEITE_BETA_2026-09-14.md). Conferência HTTPS no domínio oficial comprovou título, descrição, canonical e `og:url` no login, `robots.txt` válido, sitemap XML contendo apenas o login canônico e header `noindex, follow` na recuperação. Isso supera os defeitos de entrega pública observados em 13/09 e preservados abaixo. CI `34851806069` aprovado; Search Console/indexação e os demais headers não foram revalidados nesta rodada.
+Implementação aceita por Eduardo conforme registro da beta de 14/09/2026. Conferência HTTPS no domínio oficial comprovou título, descrição, canonical e `og:url` no login, `robots.txt` válido, sitemap XML contendo apenas o login canônico e header `noindex, follow` na recuperação. Isso supera os defeitos de entrega pública observados em 13/09 e preservados abaixo. CI `34851806069` aprovado; Search Console/indexação e os demais headers não foram revalidados nesta rodada.
 
 Naquela publicação, o frontend era apenas uma SPA React. A entrada pública era `/login`; `/` redirecionava pelo aplicativo até o login para visitantes. Não havia página pública de apresentação. Os programas e o progresso exigem autenticação e não devem entrar no sitemap.
 
@@ -40,7 +40,7 @@ O conteúdo inicial ainda depende de JavaScript para renderizar. Não foram adic
 
 O aceite de 14/09 comprova a entrega pública de metadados, robots e sitemap no recorte descrito acima. Search Console, indexação e posição no Google não foram comprovados.
 
-Na consulta pública de 13/09/2026, `https://www.disciplinapro.com.br/login` respondeu HTTP 200 com o título antigo e sem descrição/canonical. `/robots.txt` e `/sitemap.xml` retornaram o HTML da SPA. Essa falha histórica foi superada pela verificação pública de 14/09 registrada no [aceite da beta](ACEITE_BETA_2026-09-14.md).
+Na consulta pública de 13/09/2026, `https://www.disciplinapro.com.br/login` respondeu HTTP 200 com o título antigo e sem descrição/canonical. `/robots.txt` e `/sitemap.xml` retornaram o HTML da SPA. Essa falha histórica foi superada pela verificação pública de 14/09 registrada no aceite da beta.
 
 Referências: [SEO para desenvolvedores](https://developers.google.com/search/docs/fundamentals/get-started-developers), [SEO em JavaScript](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [sitemaps](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap) e [headers da Vercel](https://vercel.com/docs/project-configuration/vercel-json).
 
