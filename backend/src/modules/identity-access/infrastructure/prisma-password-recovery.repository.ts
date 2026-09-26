@@ -40,4 +40,16 @@ export class PrismaPasswordRecoveryRepository extends PasswordRecoveryRepository
       return true
     })
   }
+
+  cleanupExpired(input: { now: Date }): Promise<{ eligible: number; processed: number }> {
+    return this.prisma.$transaction(async (tx) => {
+      const where = { passwordResetExpiresAt: { lt: input.now } }
+      const eligible = await tx.user.count({ where })
+      const processed = await tx.user.updateMany({
+        where,
+        data: { passwordResetHash: null, passwordResetExpiresAt: null },
+      })
+      return { eligible, processed: processed.count }
+    })
+  }
 }

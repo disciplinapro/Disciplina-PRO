@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { SmtpClient } from '../invitations/application/smtp-client.js'
 import { NodemailerSmtpClient } from '../invitations/infrastructure/nodemailer-smtp.client.js'
 import { PasswordRecoveryUseCase } from './application/password-recovery.use-case.js'
+import { CleanupExpiredPasswordRecoveryUseCase } from './application/cleanup-expired-password-recovery.use-case.js'
 import { PasswordRecoveryRepository } from './application/password-recovery.repository.js'
 import { PasswordRecoveryDelivery } from './application/password-recovery.delivery.js'
 import { PrismaPasswordRecoveryRepository } from './infrastructure/prisma-password-recovery.repository.js'
@@ -37,6 +38,7 @@ import { AuthenticationGuard } from './http/authentication.guard.js'
   controllers: [AuthController],
   providers: [
     PasswordRecoveryUseCase,
+    CleanupExpiredPasswordRecoveryUseCase,
     { provide: PasswordRecoveryRepository, useClass: PrismaPasswordRecoveryRepository },
     { provide: PasswordRecoveryDelivery, useClass: PasswordRecoveryEmailDelivery },
     { provide: SmtpClient, useClass: NodemailerSmtpClient },
@@ -67,6 +69,7 @@ import { AuthenticationGuard } from './http/authentication.guard.js'
     RevokeSessionUseCase,
     RevokeAllSessionsUseCase,
     CleanupSessionsUseCase,
+    CleanupExpiredPasswordRecoveryUseCase,
     AccessTokenService,
     PasswordHasher,
     AuthenticationGuard,
